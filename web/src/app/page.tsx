@@ -6,7 +6,7 @@ import { useAccount, useBalance, useBytecode, useReadContract, useWatchAsset } f
 import { CheckIcon, CrossIcon, WarnIcon } from "@/components/Icons";
 import { useToken } from "@/components/useToken";
 import { useNetwork } from "@/lib/network";
-import { short } from "@/lib/order";
+import { short } from "@/lib/invoice";
 
 type Status = "ok" | "warn" | "bad" | "idle";
 interface Check {
@@ -26,7 +26,7 @@ export default function SetupPage() {
   const { net, select } = useNetwork();
   const appChain = net.chain;
   const chainMode = net.key;
-  const checkoutAddress = net.checkout;
+  const invoiceAddress = net.invoice;
   const { address, isConnected, chainId, connector } = useAccount();
   const onChain = isConnected && chainId === appChain.id;
   const token = useToken();
@@ -40,7 +40,7 @@ export default function SetupPage() {
     chainId: appChain.id,
     query: { enabled: onChain && Boolean(token.address) },
   });
-  const code = useBytecode({ address: checkoutAddress, chainId: appChain.id, query: { enabled: Boolean(checkoutAddress) } });
+  const code = useBytecode({ address: invoiceAddress, chainId: appChain.id, query: { enabled: Boolean(invoiceAddress) } });
 
   // Wallets don't list tokens on custom networks by themselves. This asks the wallet to show it
   // on the network it is on now (the app's network, since the button only shows when onChain).
@@ -59,40 +59,40 @@ export default function SetupPage() {
 
   const checks: Check[] = [
     isConnected
-      ? { title: "Wallet connected", status: "ok", value: short(address ?? ""), detail: `${connector?.name ?? "Wallet"} is connected.` }
-      : { title: "Wallet connected", status: "bad", value: "not connected", detail: "Connect MetaMask, Rabby or any browser wallet with the button at the top right." },
+      ? { title: "Wallet terhubung", status: "ok", value: short(address ?? ""), detail: `${connector?.name ?? "Wallet"} terhubung.` }
+      : { title: "Wallet terhubung", status: "bad", value: "belum terhubung", detail: "Hubungkan MetaMask, Rabby, atau wallet browser apa pun lewat tombol di kanan atas." },
     !isConnected
-      ? { title: "Network", status: "idle", value: "—", detail: `Needs ${appChain.name} (${appChain.id}).` }
+      ? { title: "Jaringan", status: "idle", value: "—", detail: `Butuh ${appChain.name} (${appChain.id}).` }
       : onChain
-        ? { title: "Network", status: "ok", value: `chain ${appChain.id}`, detail: `Connected to ${appChain.rpcUrls.default.http[0]}.` }
+        ? { title: "Jaringan", status: "ok", value: `chain ${appChain.id}`, detail: `Terhubung ke ${appChain.rpcUrls.default.http[0]}.` }
         : {
             title: "Network",
             status: "bad",
             value: `chain ${chainId}`,
-            detail: `Switch to ${appChain.name} (${appChain.id}). Your wallet will offer to add it.`,
-            action: { label: "Switch network", onClick: () => select(net.key) },
+            detail: `Pindah ke ${appChain.name} (${appChain.id}). Wallet kamu akan menawarkan untuk menambahkannya.`,
+            action: { label: "Pindah jaringan", onClick: () => select(net.key) },
           },
     !onChain || gasValue === undefined
-      ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "idle", value: "—", detail: "Pays for transactions. Gasless checkout doesn't need it." }
+      ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "idle", value: "—", detail: "Pays for transactions. Gasless payment doesn't need it." }
       : gasValue > 0n
-        ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "ok", value: `${Number(formatEther(gasValue)).toFixed(4)} ${appChain.nativeCurrency.symbol}`, detail: chainMode === "fork" ? FORK_COPY : "1 tQDAY covers hundreds of contract calls at 1 gwei." }
+        ? { title: `Gas (${appChain.nativeCurrency.symbol})`, status: "ok", value: `${Number(formatEther(gasValue)).toFixed(4)} ${appChain.nativeCurrency.symbol}`, detail: chainMode === "fork" ? FORK_COPY : "1 tQDAY cukup untuk ratusan panggilan kontrak di 1 gwei." }
         : chainMode === "aevum"
           ? { title: "Gas (tQDAY)", status: "warn", value: "0 tQDAY", detail: DISCORD_FAUCET, action: { label: "Open web faucet", href: links.faucetWeb } }
-          : { title: "Gas", status: "warn", value: "0", detail: chainMode === "fork" ? "Give yourself tQDAY and tUSD8 with `make deal TO=<address>`." : "Import one of anvil's default accounts into your wallet (local chain only)." },
+          : { title: "Gas", status: "warn", value: "0", detail: chainMode === "fork" ? "Beri dirimu tQDAY dan tUSD8 dengan `make deal TO=<address>`." : "Impor salah satu akun default anvil ke wallet (hanya chain lokal)." },
     !onChain || tokenValue === undefined
-      ? { title: `${token.symbol} balance`, status: "idle", value: "—", detail: "The stablecoin the checkout uses (6 decimals)." }
+      ? { title: `${token.symbol} balance`, status: "idle", value: "—", detail: "The stablecoin invoices are paid in (6 decimals)." }
       : tokenValue > 0n
-        ? { title: `${token.symbol} balance`, status: "ok", value: `${formatUnits(tokenValue, token.decimals)} ${token.symbol}`, detail: chainMode === "fork" ? "Ready to pay. Also copied from Aevum testnet." : "Ready to pay.", action: addToken }
+        ? { title: `${token.symbol} balance`, status: "ok", value: `${formatUnits(tokenValue, token.decimals)} ${token.symbol}`, detail: chainMode === "fork" ? "Siap bayar. Juga disalin dari Aevum testnet." : "Siap bayar.", action: addToken }
         : chainMode === "aevum"
           ? { title: "tUSD8 balance", status: "warn", value: "0 tUSD8", detail: DISCORD_FAUCET, action: addToken }
-          : { title: `${token.symbol} balance`, status: "warn", value: "0", detail: chainMode === "fork" ? "On a fork, give yourself tUSD8 with `make deal TO=<address>`." : "MockUSD8 lets anyone mint: `make mint TO=<address>`.", action: addToken },
-    !checkoutAddress
-      ? { title: "Checkout contract", status: "warn", value: "not set", detail: chainMode === "aevum" ? "Deploy it with `make deploy-aevum`, then set NEXT_PUBLIC_CHECKOUT_AEVUM in web/.env.local." : chainMode === "fork" ? "Deploy it with `make deploy-fork`, then set NEXT_PUBLIC_CHECKOUT_FORK in web/.env.local." : "Deploy it with `make deploy-local`, then set NEXT_PUBLIC_CHECKOUT_LOCAL in web/.env.local." }
+          : { title: `${token.symbol} balance`, status: "warn", value: "0", detail: chainMode === "fork" ? "Di fork, beri dirimu tUSD8 dengan `make deal TO=<address>`." : "MockUSD8 bisa di-mint siapa saja: `make mint TO=<address>`.", action: addToken },
+    !invoiceAddress
+      ? { title: "Kontrak Invoice", status: "warn", value: "belum diatur", detail: chainMode === "aevum" ? "Deploy dengan `make deploy-aevum`, lalu set NEXT_PUBLIC_INVOICE_AEVUM di web/.env.local." : chainMode === "fork" ? "Deploy dengan `make deploy-fork`, lalu set NEXT_PUBLIC_INVOICE_FORK di web/.env.local." : "Deploy dengan `make deploy-local`, lalu set NEXT_PUBLIC_INVOICE_LOCAL di web/.env.local." }
       : code.isLoading
-        ? { title: "Checkout contract", status: "idle", value: short(checkoutAddress), detail: "Looking it up…" }
+        ? { title: "Kontrak Invoice", status: "idle", value: short(invoiceAddress), detail: "Mencari…" }
         : code.data && code.data !== "0x"
-          ? { title: "Checkout contract", status: "ok", value: short(checkoutAddress), detail: "Deployed and reachable." }
-          : { title: "Checkout contract", status: "bad", value: short(checkoutAddress), detail: `No contract at this address on ${appChain.name}. Check the address in web/.env.local.` },
+          ? { title: "Kontrak Invoice", status: "ok", value: short(invoiceAddress), detail: "Sudah di-deploy dan bisa dijangkau." }
+          : { title: "Kontrak Invoice", status: "bad", value: short(invoiceAddress), detail: `Tidak ada kontrak di alamat ini di ${appChain.name}. Periksa alamatnya di web/.env.local.` },
   ];
 
   const passed = checks.filter((c) => c.status === "ok").length;
@@ -102,9 +102,9 @@ export default function SetupPage() {
     <main className="shell">
       <section className="page-head">
         <div>
-          <p className="eyebrow">Step 0 · Before you build</p>
-          <h1>Is your setup ready for Aevum?</h1>
-          <p className="lede">We check your wallet, network, balances and contract, and tell you exactly what to fix.</p>
+          <p className="eyebrow">Langkah 0 · Sebelum mulai</p>
+          <h1>Apakah setup kamu sudah siap?</h1>
+          <p className="lede">Kami memeriksa wallet, jaringan, saldo, dan kontrakmu, lalu memberi tahu apa yang harus diperbaiki. Kalau semua hijau, kamu bisa langsung membuat tagihan.</p>
         </div>
         <div className="score" aria-live="polite">
           <span className="score-num">
@@ -112,7 +112,7 @@ export default function SetupPage() {
             <small> / {checks.length}</small>
           </span>
           <span style={{ fontSize: 13, fontWeight: 600, color: left ? "var(--warn)" : "var(--good)" }}>
-            {left ? `${left} item${left > 1 ? "s" : ""} to fix` : "Ready to build"}
+            {left ? `${left} hal perlu diperbaiki` : "Siap dipakai"}
           </span>
         </div>
       </section>
@@ -150,7 +150,7 @@ export default function SetupPage() {
 
         <div className="stack">
           <div className="card">
-            <h2>Network details</h2>
+            <h2>Detail jaringan</h2>
             <p className="sub">
               Already set in <code>packages/aevum/src/chain.ts</code>.
               {chainMode === "fork" && " Balances start as a copy of Aevum testnet; what you spend here stays on your machine."}
@@ -177,7 +177,7 @@ export default function SetupPage() {
           </div>
 
           <div className="card info">
-            <h2>Known gotchas</h2>
+            <h2>Hal yang perlu diketahui</h2>
             <ul>
               <li>
                 Compile with <code>evm_version = &quot;shanghai&quot;</code>. Cancun builds deploy, then fail with <em>invalid opcode: MCOPY</em>.

@@ -1,6 +1,6 @@
 "use client";
 
-import { checkoutAbi, getLogsChunked, txUrl } from "@aevum-kit/aevum";
+import { getLogsChunked, invoiceAbi, txUrl } from "@aevum-kit/aevum";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,18 +8,18 @@ import { formatUnits, getAbiItem, type PublicClient } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import { useToken } from "@/components/useToken";
 import { useNetwork } from "@/lib/network";
-import { orderLabel, short } from "@/lib/order";
+import { invoiceLabel, short } from "@/lib/invoice";
 
 const WINDOWS = [
-  { blocks: 1_000n, label: "Last 1k blocks" },
-  { blocks: 5_000n, label: "Last 5k blocks" },
-  { blocks: 20_000n, label: "Last 20k blocks" },
+  { blocks: 1_000n, label: "1.000 block terakhir" },
+  { blocks: 5_000n, label: "5.000 block terakhir" },
+  { blocks: 20_000n, label: "20.000 block terakhir" },
 ];
 
 export default function ActivityPage() {
   const { net } = useNetwork();
   const appChain = net.chain;
-  const checkoutAddress = net.checkout;
+  const invoiceAddress = net.invoice;
   const deployBlock = net.deployBlock;
   const hasExplorer = net.hasExplorer;
   const client = usePublicClient({ chainId: appChain.id }) as PublicClient | undefined;
@@ -30,16 +30,16 @@ export default function ActivityPage() {
   const [progress, setProgress] = useState(0);
 
   const logs = useQuery({
-    queryKey: ["paid-logs", appChain.id, checkoutAddress, windowSize.toString(), onlyMine ? address : null],
-    enabled: Boolean(client && checkoutAddress),
+    queryKey: ["paid-logs", appChain.id, invoiceAddress, windowSize.toString(), onlyMine ? address : null],
+    enabled: Boolean(client && invoiceAddress),
     queryFn: async () => {
       const head = await client!.getBlockNumber();
       let from = head > windowSize ? head - windowSize + 1n : 0n;
       if (deployBlock !== undefined && deployBlock > from) from = deployBlock;
       setProgress(0);
       const result = await getLogsChunked(client!, {
-        address: checkoutAddress!,
-        event: getAbiItem({ abi: checkoutAbi, name: "Paid" }),
+        address: invoiceAddress!,
+        event: getAbiItem({ abi: invoiceAbi, name: "Paid" }),
         args: onlyMine && address ? { payer: address } : undefined,
         fromBlock: from,
         toBlock: head,
@@ -55,26 +55,26 @@ export default function ActivityPage() {
     <main className="shell">
       <div className="page-head">
         <div>
-          <p className="eyebrow">Example · reading events</p>
-          <h1>Payment activity</h1>
+          <p className="eyebrow">Tagihan Kilat · membaca event</p>
+          <h1>Aktivitas pembayaran</h1>
           <p className="lede">
-            Every <code>Paid</code> event from your Checkout. Aevum serves at most 1,000 blocks per <code>eth_getLogs</code> call, so the kit
-            reads in chunks.
+            Semua event <code>Paid</code> dari kontrak Invoice. Aevum melayani paling banyak 1.000 block per panggilan{" "}
+            <code>eth_getLogs</code>, jadi aplikasi membacanya per potongan.
           </p>
         </div>
         {logs.data && (
           <div className="score">
             <span className="score-num">{logs.data.items.length}</span>
             <span className="fine">
-              payments · {formatUnits(total, token.decimals)} {token.symbol}
+              pembayaran · {formatUnits(total, token.decimals)} {token.symbol}
             </span>
           </div>
         )}
       </div>
 
-      {!checkoutAddress ? (
+      {!invoiceAddress ? (
         <div className="card empty">
-          No Checkout configured for {net.label}. Set <code>NEXT_PUBLIC_CHECKOUT_{net.key.toUpperCase()}</code> in <code>web/.env.local</code>.
+          No Invoice configured for {net.label}. Set <code>NEXT_PUBLIC_INVOICE_{net.key.toUpperCase()}</code> in <code>web/.env.local</code>.
         </div>
       ) : (
         <section className="card flush">
@@ -92,7 +92,7 @@ export default function ActivityPage() {
             ))}
             <label style={{ display: "inline-flex", gap: 8, alignItems: "center", marginLeft: "auto", fontSize: 14, color: "var(--text-muted)" }}>
               <input type="checkbox" checked={onlyMine} disabled={!address} onChange={(e) => setOnlyMine(e.target.checked)} />
-              Only my payments
+              Hanya pembayaran saya
             </label>
           </div>
 
@@ -102,16 +102,16 @@ export default function ActivityPage() {
                 <span style={{ width: `${progress}%` }} />
               </div>
               <p className="fine" style={{ marginTop: 8 }}>
-                Scanning {windowSize.toLocaleString("en-US")} blocks, 1,000 at a time… {progress}%
+                Memindai {windowSize.toLocaleString("id-ID")} block, 1.000 block sekali baca… {progress}%
               </p>
             </div>
           )}
 
-          {logs.error && <p className="empty">Couldn&apos;t read events: {(logs.error as Error).message}</p>}
+          {logs.error && <p className="empty">Tidak bisa membaca event: {(logs.error as Error).message}</p>}
 
           {logs.data && logs.data.items.length === 0 && !logs.isFetching && (
             <p className="empty">
-              No payments in blocks {logs.data.from.toString()}–{logs.data.head.toString()}. <Link href="/checkout">Make one</Link>.
+              Tidak ada pembayaran di block {logs.data.from.toString()}–{logs.data.head.toString()}. <Link href="/invoices">Buat tagihan</Link>.
             </p>
           )}
 
@@ -120,7 +120,7 @@ export default function ActivityPage() {
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Order</th>
+                    <th>Tagihan</th>
                     <th>Payer</th>
                     <th className="right">Amount</th>
                     <th className="right">Block</th>
@@ -130,14 +130,14 @@ export default function ActivityPage() {
                 <tbody>
                   {logs.data.items.map((l) => (
                     <tr key={`${l.transactionHash}-${l.logIndex}`}>
-                      <td className="mono">{l.args.orderId ? orderLabel(l.args.orderId) : "—"}</td>
+                      <td className="mono">{l.args.invoiceId ? invoiceLabel(l.args.invoiceId) : "—"}</td>
                       <td className="mono">{short(l.args.payer ?? "")}</td>
                       <td className="right num">
                         {formatUnits(l.args.amount ?? 0n, token.decimals)} {token.symbol}
                       </td>
                       <td className="right num">{l.blockNumber?.toString()}</td>
                       <td style={{ display: "flex", gap: 14 }}>
-                        <Link href={`/receipts/${l.args.orderId}?tx=${l.transactionHash}&chain=${appChain.id}`}>Receipt</Link>
+                        <Link href={`/receipts/${l.args.invoiceId}?tx=${l.transactionHash}&chain=${appChain.id}`}>Struk</Link>
                         {hasExplorer && l.transactionHash && (
                           <a href={txUrl(l.transactionHash)} target="_blank" rel="noreferrer">
                             Tx

@@ -4,13 +4,14 @@ pragma solidity ^0.8.24;
 import {Script, console} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Checkout} from "../src/Checkout.sol";
+import {Invoice} from "../src/Invoice.sol";
 import {MockUSD8} from "../src/mocks/MockUSD8.sol";
 
-/// @notice Deploys Checkout.
+/// @notice Deploys Checkout (the kit's example) and Invoice (Tagihan Kilat).
 ///   - Aevum testnet and `make fork`: uses the real tUSD8.
 ///   - `make anvil` (chain 31337) only: deploys MockUSD8 first and mints 1,000 to the deployer.
 ///   - Anywhere else it stops, rather than deploy a token anyone can mint.
-///   MERCHANT (optional env) receives payments; defaults to the deployer. anvil's public
+///   MERCHANT (optional env) receives Checkout payments; defaults to the deployer. anvil's public
 ///   accounts are refused as merchant outside local chains: anyone could take that money.
 ///
 ///   make deploy-local                         # anvil on 127.0.0.1:8545
@@ -22,7 +23,7 @@ contract Deploy is Script {
     /// anvil's default accounts come from this public mnemonic.
     string constant ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
 
-    function run() external returns (Checkout checkout, address token) {
+    function run() external returns (Checkout checkout, Invoice invoice, address token) {
         vm.startBroadcast();
         (, address deployer,) = vm.readCallers();
         address merchant = vm.envOr("MERCHANT", deployer);
@@ -38,12 +39,14 @@ contract Deploy is Script {
             token = address(mock);
         }
         checkout = new Checkout(IERC20(token), merchant);
+        invoice = new Invoice(IERC20(token));
         vm.stopBroadcast();
 
         console.log("chainId  ", block.chainid);
         console.log("token    ", token);
         console.log("merchant ", merchant);
         console.log("Checkout ", address(checkout));
+        console.log("Invoice  ", address(invoice));
     }
 
     function isAnvilAccount(address a) internal pure returns (bool) {

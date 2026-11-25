@@ -10,9 +10,9 @@ import { useNetwork } from "@/lib/network";
 
 const links = [
   { href: "/", label: "Setup" },
-  { href: "/checkout", label: "Checkout" },
-  { href: "/activity", label: "Activity" },
-  { href: "/docs", label: "Docs" },
+  { href: "/invoices", label: "Tagihan" },
+  { href: "/activity", label: "Aktivitas" },
+  { href: "/docs", label: "Dokumen" },
 ];
 
 export function Header() {
@@ -27,7 +27,7 @@ export function Header() {
         <div className="shell">
           <Link href="/" className="brand">
             <span className="brand-mark" aria-hidden="true" />
-            <span className="brand-name">Aevum Starter Kit</span>
+            <span className="brand-name">Tagihan Kilat</span>
           </Link>
           <nav className="nav" aria-label="Main">
             {links.map((l) => {

@@ -40,3 +40,33 @@ export const checkoutAbi = parseAbi([
   "error ZeroAmount()",
   "error ZeroAddress()",
 ]);
+
+/** ABI of Tagihan Kilat's contracts/src/Invoice.sol. Same two payment modes as Checkout,
+ *  plus the invoice registry: the amount is decided on-chain, so nobody can mark an invoice
+ *  paid with a dust payment. The `Paid` event has the same signature as Checkout's, so the
+ *  receipts and activity pages read it unchanged. */
+export const invoiceAbi = parseAbi([
+  "function token() view returns (address)",
+  "function createInvoice(bytes32 invoiceId, address buyer, uint256 amount, uint64 dueAt, string memo)",
+  "function cancelInvoice(bytes32 invoiceId)",
+  "function pay(bytes32 invoiceId, uint256 amount)",
+  "function payWithAuthorization(bytes32 invoiceId, address from, uint256 amount, uint256 validAfter, uint256 validBefore, uint8 v, bytes32 r, bytes32 s)",
+  "function authorizationNonce(bytes32 invoiceId) view returns (bytes32)",
+  "function invoiceOf(bytes32 invoiceId) view returns ((address seller, address buyer, uint256 amount, uint64 dueAt, uint64 createdAt, uint8 status, address payer, uint64 paidAt, string memo))",
+  "function isPaid(bytes32 invoiceId) view returns (bool)",
+  "function isExpired(bytes32 invoiceId) view returns (bool)",
+  "event InvoiceCreated(bytes32 indexed invoiceId, address indexed seller, address indexed buyer, uint256 amount, uint64 dueAt)",
+  "event Paid(bytes32 indexed invoiceId, address indexed payer, uint256 amount)",
+  "event InvoiceCancelled(bytes32 indexed invoiceId)",
+  "error InvoiceExists(bytes32 invoiceId)",
+  "error InvoiceNotFound(bytes32 invoiceId)",
+  "error WrongAmount(uint256 expected, uint256 got)",
+  "error WrongPayer(address expected, address got)",
+  "error InvoiceExpired(bytes32 invoiceId)",
+  "error InvoiceIsCancelled(bytes32 invoiceId)",
+  "error AlreadyPaid(bytes32 invoiceId)",
+  "error NotSeller()",
+  "error ZeroAmount()",
+  "error ZeroAddress()",
+  "error MemoTooLong()",
+]);

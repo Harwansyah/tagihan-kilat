@@ -11,13 +11,19 @@ export function explain(error: unknown): string {
     const revert = error.walk((e) => e instanceof ContractFunctionRevertedError);
     if (revert instanceof ContractFunctionRevertedError) {
       const name = revert.data?.errorName;
-      if (name === "AlreadyPaid") return "This order is already paid. Start a new order.";
+      if (name === "AlreadyPaid") return "This invoice is already paid. The seller can make a new invoice.";
+      if (name === "WrongAmount") return "The amount must match the invoice exactly — check the invoice and try again.";
+      if (name === "WrongPayer") return "This invoice is for a different buyer. Ask the seller for a new invoice.";
+      if (name === "InvoiceExpired") return "This invoice is past its due date. Ask the seller for a new invoice.";
+      if (name === "InvoiceIsCancelled") return "This invoice was cancelled by the seller.";
+      if (name === "InvoiceNotFound") return "This invoice doesn't exist on this network yet. Check the link or the network.";
       if (name === "ZeroAmount") return "The amount must be more than zero.";
+      if (name === "MemoTooLong") return "The note is too long — keep it under 200 characters.";
       const reason = revert.reason ?? "";
-      if (/invalid signature/i.test(reason)) return "The signature doesn't match this order or amount. Sign again.";
+      if (/invalid signature/i.test(reason)) return "The signature doesn't match this invoice or amount. Sign again.";
       if (/expired/i.test(reason)) return "Your signature expired before it was submitted. Nothing was charged. Sign again.";
-      if (/exceeds balance|insufficient/i.test(reason)) return "Not enough tUSD8 in your wallet for this order.";
-      if (/allowance/i.test(reason)) return "The approval is lower than the order total. Approve again.";
+      if (/exceeds balance|insufficient/i.test(reason)) return "Not enough tUSD8 in your wallet for this invoice.";
+      if (/allowance/i.test(reason)) return "The approval is lower than the invoice total. Approve again.";
       if (reason) return reason;
     }
     if (/insufficient funds/i.test(error.message)) return "Not enough tQDAY for gas. Get some from the faucet, or use Gasless mode.";

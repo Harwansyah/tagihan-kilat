@@ -10,13 +10,13 @@ const interTight = Inter_Tight({ subsets: ["latin"], weight: ["500", "600", "700
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Aevum Starter Kit", template: "%s · Aevum Starter Kit" },
-  description: "Build and test stablecoin payments on QDay Aevum testnet.",
+  title: { default: "Tagihan Kilat", template: "%s · Tagihan Kilat" },
+  description: "Tagihan stablecoin tUSD8 untuk warung dan UMKM di Aevum testnet — buat, bagikan link, terima bayaran.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable} ${jetbrains.variable}`}>
+    <html lang="id" className={`${inter.variable} ${interTight.variable} ${jetbrains.variable}`}>
       <body>
         <Providers>
           <Header />
