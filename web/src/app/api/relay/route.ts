@@ -168,7 +168,9 @@ export async function POST(req: Request) {
   }
   const vNum = v !== undefined ? Number(v) : 27 + (yParity ?? 0);
 
-  const transport = http();
+  // Same slow-RPC tolerance as the browser client (see lib/wagmi.ts):
+  // the Aevum public RPC sometimes hangs on eth_call.
+  const transport = http(net.chain.rpcUrls.default.http[0], { timeout: 30_000, retryCount: 4, retryDelay: 500 });
   const client = createPublicClient({ chain: net.chain, transport });
   const wallet = createWalletClient({ account, chain: net.chain, transport });
 
