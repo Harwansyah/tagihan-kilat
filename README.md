@@ -6,6 +6,26 @@ Built for **Aevum Builder Challenge #1** (QDay) on **Aevum testnet** (chain `440
 
 > **Demo video:** _coming soon_ — a 2-minute walkthrough (buat tagihan → bayar Gasless → struk Lunas) will be linked here before submission.
 
+## Deployed on Aevum testnet
+
+Deployed **25 Nov 2026** from commit `c57ca74` (deployer `0xf29542B13f26C4A90813415DB583b06d9206C1cf`, test-only wallet funded by the QDay Discord faucet).
+
+| Kontrak | Alamat | Tx deploy |
+|---|---|---|
+| **Invoice** | [`0x0f54F0c9f4d577f5c7dD55f35eb53D124A4B964F`](https://explorer-test.qday.info/address/0x0f54F0c9f4d577f5c7dD55f35eb53D124A4B964F) | [`0xbc29349619fe387d5571b17299967c1199f9b0f8a6346631c33fd5205149e807`](https://explorer-test.qday.info/tx/0xbc29349619fe387d5571b17299967c1199f9b0f8a6346631c33fd5205149e807) |
+| **Checkout** (contoh kit) | [`0x42D1240F55fC27bC936c099e576ab4279A7302F7`](https://explorer-test.qday.info/address/0x42D1240F55fC27bC936c099e576ab4279A7302F7) | [`0x8c558a0ef5693e22e04fa4e2c478b93e53619c5ec597036f9b37530cb050c773`](https://explorer-test.qday.info/tx/0x8c558a0ef5693e22e04fa4e2c478b93e53619c5ec597036f9b37530cb050c773) |
+
+Token: **tUSD8** [`0x456569838f1d43009A91ebA4263147Afd7233483`](https://explorer-test.qday.info/address/0x456569838f1d43009A91ebA4263147Afd7233483) (6 desimal).
+
+**Bukti end-to-end di testnet asli (25 Nov 2026):** dua tagihan dibuat dan dibayar lewat kontrak yang di-deploy — saldo penjual naik persis sebesar tagihan, dan event `Paid` tercatat di chain untuk keduanya.
+
+| Tagihan | Cara bayar | Tx buat | Tx bayar |
+|---|---|---|---|
+| A — 0,50 tUSD8 "Nasi goreng x2, Es teh x1" | Standar (approve + pay) | [`0x66093a49…5e8282`](https://explorer-test.qday.info/tx/0x66093a4976665e04b546fc96a14e2c28047040f27db9e3060da688e55d5e8282) | [`0x5444dd8c…2b81b`](https://explorer-test.qday.info/tx/0x5444dd8cc005a6f45b82e781ed108fb01daece572208a1928ed8289504b2b81b) |
+| B — 0,25 tUSD8 "Kopi susu x1" | Gasless (EIP-3009, relayer yang kirim) | [`0x52780e63…93d37a`](https://explorer-test.qday.info/tx/0x52780e63c804248d747dc463ec9f03af70b93633ec0d81fe585742df8f93d37a) | [`0x82cb24be…40ec`](https://explorer-test.qday.info/tx/0x82cb24be0c44ea6393e96a7943f89e5d88461351b4869bfae878544ee0a340ec) |
+
+Catatan: pembayaran Gasless di atas dilakukan dengan memanggil `payWithAuthorization` langsung dari wallet relayer (jalur on-chain yang sama yang dipakai route `/api/relay`); route HTTP relayernya sendiri sudah teruji di E2E fork lokal. Sisa saldo deployer setelah E2E: ~0,948 tQDAY + 4,75 tUSD8.
+
 ## Masalahnya
 
 Penjual kecil di Indonesia — warung makan, penjual kopi keliling, UMKM — sudah jualan lewat WhatsApp, tapi pembayarannya masih manual: transfer bank lalu kirim bukti screenshot, atau bayar tunai. Tidak ada tagihan yang bisa dicek statusnya, tidak ada bukti bayar yang bisa dipercaya kedua pihak.
@@ -98,6 +118,8 @@ cast wallet import aevum-deployer --interactive   # kunci wallet TEST saja
 cast wallet address --account aevum-deployer      # isi dari faucet Discord
 make deploy-aevum ACCOUNT=aevum-deployer          # mencetak alamat Invoice + Checkout
 ```
+
+**Sudah di-deploy 25 Nov 2026** (lihat [bagian Deployed di atas](#deployed-on-aevum-testnet)): Invoice `0x0f54F0c9f4d577f5c7dD55f35eb53D124A4B964F`, Checkout `0x42D1240F55fC27bC936c099e576ab4279A7302F7`.
 
 Lalu set `NEXT_PUBLIC_INVOICE_AEVUM` di `web/.env.local` dan tambahkan `aevum` ke `NEXT_PUBLIC_NETWORKS`. Untuk relayer di jaringan asli, beri wallet test sendiri dengan sedikit tQDAY — jangan pernah pakai kunci anvil (kuncinya publik).
 

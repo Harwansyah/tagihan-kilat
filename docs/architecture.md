@@ -116,8 +116,9 @@ E2E (`web/scripts/e2e-fork.mjs`, 20 checks): penjual membuat tagihan 2,50 tUSD8 
 
 ## Yang masih terbuka (setelah build ini)
 
-1. **Faucet Discord** — butuh akun Discord harwansyah untuk `/faucet` (1 tQDAY + 5 tUSD8) sebelum deploy ke Aevum testnet asli.
-2. **Deploy testnet + demo live (Vercel)** — setelah token faucet didapat.
-3. **Repo GitHub publik** (di bawah `Harwansyah`) + pin di profil.
-4. **Video demo 2 menit** — rekam alur buat → bayar Gasless → struk Lunas.
-5. **Submit di DoraHacks** — sebelum 11 Des 2026 15:00 WIB, dari akun harwansyah. Kalau masuk Top 5: demo live 3–5 menit di video call, 15 Des.
+1. ✅ ~~Faucet Discord~~ — selesai 25 Nov 2026: 1 tQDAY + 5 tUSD8 diklaim ke deployer `0xf29542B13f26C4A90813415DB583b06d9206C1cf`.
+2. ✅ ~~Deploy testnet~~ — selesai 25 Nov 2026: Invoice `0x0f54F0c9f4d577f5c7dD55f35eb53D124A4B964F` + Checkout `0x42D1240F55fC27bC936c099e576ab4279A7302F7` di chain 44005; E2E di testnet asli lolos (tagihan 0,50 tUSD8 Standar + 0,25 tUSD8 Gasless, keduanya Lunas, event `Paid` terverifikasi). Lihat README bagian Deployed.
+3. **Demo live (Vercel)** — setelah repo publik, deploy web dengan `NEXT_PUBLIC_INVOICE_AEVUM` di atas.
+4. **Repo GitHub publik** (di bawah `Harwansyah`) + pin di profil.
+5. **Video demo 2 menit** — rekam alur buat → bayar Gasless → struk Lunas.
+6. **Submit di DoraHacks** — sebelum 11 Des 2026 15:00 WIB, dari akun harwansyah. Kalau masuk Top 5: demo live 3–5 menit di video call, 15 Des.
