@@ -4,7 +4,7 @@
 
 Built for **Aevum Builder Challenge #1** (QDay) on **Aevum testnet** (chain `44005`).
 
-> **Demo video:** _coming soon_ — a 2-minute walkthrough (buat tagihan → bayar Gasless → struk Lunas) will be linked here before submission.
+> **Demo video:** [Tagihan Kilat — Demo | Aevum Builder Challenge #1](https://www.youtube.com/watch?v=I9j45I5b0dM) — 1:39 walkthrough (buat tagihan → bayar Standard → struk Lunas), recorded on the live demo with test wallets.
 
 ## Deployed on Aevum testnet
 
